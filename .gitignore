@@ -28,5 +28,9 @@ node_modules
 
 # TypeScript unnecessary files
 typings
+.tscache
 **/*.js
 **/*.js.map
+
+# Development files
+!Gruntfile.js
