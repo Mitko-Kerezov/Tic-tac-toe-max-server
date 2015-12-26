@@ -1,0 +1,27 @@
+{
+  "name": "tic-tac-toe-max",
+  "version": "0.0.1",
+  "description": "Server for Tic Tac Toe Max game",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mitko-Kerezov/Tic-tac-toe-max-server.git"
+  },
+  "author": "Mitko-Kerezov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mitko-Kerezov/Tic-tac-toe-max-server/issues"
+  },
+  "homepage": "https://github.com/Mitko-Kerezov/Tic-tac-toe-max-server#readme",
+  "devDependencies": {
+    "tsd": "^0.6.5",
+    "typescript": "^1.7.5"
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "tsd": "^0.6.5"
+  }
+}
