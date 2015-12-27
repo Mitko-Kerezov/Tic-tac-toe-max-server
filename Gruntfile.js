@@ -13,15 +13,15 @@ module.exports = function(grunt) {
 			},
 
 			devall: {
-				src: ["app.ts", "utilities/**/*.ts", "routes/**/*.ts"],
-				reference: "typings/tsd.d.ts"
+				src: ["definitions.d.ts", "app.ts", "config/**/*.ts", "utilities/**/*.ts", "routes/**/*.ts", "data/**/*.ts"],
+				reference: ".d.ts"
 			}
 		},
 
 		tslint: {
             build: {
                 files: {
-                    src: ["app.ts", "utilities/**/*.ts", "routes/**/*.ts"]
+                    src: ["app.ts", "config/**/*.ts", "utilities/**/*.ts", "routes/**/*.ts", "data/**/*.ts"]
                 },
                 options: {
                     configuration: grunt.file.readJSON("./tslint.json")
@@ -30,12 +30,13 @@ module.exports = function(grunt) {
         },
 
 		clean: {
-			src: ["**/*.js*", "!node_modules/**/*.js"]
+            src: ["app.js", "config/**/*.js", "utilities/**/*.js", "routes/**/*.js", "data/**/*.js"]
 		}
 	});
 
 	grunt.loadNpmTasks("grunt-ts");
 	grunt.loadNpmTasks("grunt-tslint");
+	grunt.loadNpmTasks("grunt-contrib-clean");
 
 	grunt.registerTask("default", "ts:devall");
 	grunt.registerTask("lint", ["tslint:build"]);

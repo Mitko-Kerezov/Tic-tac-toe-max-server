@@ -5,10 +5,13 @@ import * as http from 'http';
 import * as debugModule from 'debug';
 import * as routes from './routes/index';
 
+let env = process.env.NODE_ENV || 'development';
+let config = require('./config/config')[env];
 let app = express();
 let server = http.createServer(app);
-let port = process.env.PORT || '1234';
 let debug = debugModule('Tic-Tac-Toe-Max:server');
+
+require('./config/mongoose')(config.db);
 
 app.use('/', routes);
 
@@ -26,8 +29,9 @@ app.use((err: any, req: express.Request, res: express.Response) => {
 	});
 });
 
-app.set('port', port);
-server.listen(port);
+app.set('port', config.port);
+
+server.listen(config.port);
 server.on('listening', () => {
 	let addr = server.address();
 	let bind = typeof addr === 'string'
