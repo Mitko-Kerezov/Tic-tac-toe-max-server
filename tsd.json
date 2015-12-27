@@ -6,7 +6,7 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "node/node.d.ts": {
-      "commit": "1da639a106527e0c4010b354a1efe52a3059a291"
+      "commit": "ed8d6b2e1c92e712b20b9b8fbf521f8bc5cd259c"
     },
     "mime/mime.d.ts": {
       "commit": "1da639a106527e0c4010b354a1efe52a3059a291"
@@ -19,6 +19,12 @@
     },
     "debug/debug.d.ts": {
       "commit": "1da639a106527e0c4010b354a1efe52a3059a291"
+    },
+    "cryptojs/cryptojs.d.ts": {
+      "commit": "ed8d6b2e1c92e712b20b9b8fbf521f8bc5cd259c"
+    },
+    "mongoose/mongoose.d.ts": {
+      "commit": "ed8d6b2e1c92e712b20b9b8fbf521f8bc5cd259c"
     }
   }
 }

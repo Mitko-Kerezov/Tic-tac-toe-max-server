@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 			},
 
 			devall: {
-				src: ["**/*.ts", "!node_modules/**/*.ts"],
+				src: ["app.ts", "utilities/**/*.ts", "routes/**/*.ts"],
 				reference: "typings/tsd.d.ts"
 			}
 		},
@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 		tslint: {
             build: {
                 files: {
-                    src: ["**/*.ts", "!node_modules/**/*.ts", "!typings/**/*.ts"]
+                    src: ["app.ts", "utilities/**/*.ts", "routes/**/*.ts"]
                 },
                 options: {
                     configuration: grunt.file.readJSON("./tslint.json")

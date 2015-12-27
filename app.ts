@@ -1,9 +1,9 @@
 /// <reference path='./typings/tsd.d.ts' />
 
-import express = require('express');
-import http = require('http');
-import debugModule = require('debug');
-import routes = require('./routes/index');
+import * as express from 'express';
+import * as http from 'http';
+import * as debugModule from 'debug';
+import * as routes from './routes/index';
 
 let app = express();
 let server = http.createServer(app);
