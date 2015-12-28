@@ -1,26 +1,14 @@
 /// <reference path='../.d.ts' />
 
 import * as express from 'express';
-import {UserModel} from '../data/models/Users';
-import {GameModel} from '../data/models/Games';
-import {IGame} from '../data/models/Games';
-import {IUser} from '../data/models/Users';
+import {UsersController} from '../controllers/usersController';
+import {GamesController} from '../controllers/gamesController';
+import * as bodyParser from 'body-parser';
 
 module.exports = (app: express.IRouter<express.Application>) => {
-	app.get('/', (req, res, next) => {
-		GameModel.create({}).then((game: IGame) => {
-			UserModel.create({
-				username: "pesho",
-				salt: "123",
-				hashPass: "asd",
-				games: [game._id]
-			}).then((obj: IUser) => {
-				res.send(200, obj);
-			}, (err: any) => {
-				console.error(err);
-			});
-		}, (err: any) => {
-			console.error(err);
-		});
-	});
+	app.use(bodyParser.urlencoded({extended:true}));
+	app.use(bodyParser.json());
+
+	app.post('/users', UsersController.postRegister);
+	app.post('/games', GamesController.postRegister);
 };
