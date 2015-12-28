@@ -1,7 +1,6 @@
 /// <reference path='../../.d.ts' />
 
 import * as encryption from '../../utilities/encryption';
-import * as games from './Games';
 import mongoose = require('mongoose');
 
 let userSchema: mongoose.Schema = new mongoose.Schema({
@@ -11,9 +10,6 @@ let userSchema: mongoose.Schema = new mongoose.Schema({
 		wins: { type: Number, default: 0},
 		losses: { type: Number, default: 0},
 		gameIds: { type: Array, default: []},
-	})
-	.static('findByUsername', (username: string, callback?: (err: any, res: IUser) => void) => {
-		UserModel.findOne({ username: new RegExp(username, 'i') }, callback);
 	})
 	.method({
 		authenticate: (password: string) => {
@@ -31,7 +27,7 @@ export interface IUser extends mongoose.Document {
 	hashPass: string;
 	wins: number;
 	losses: number;
-	gameIds: string[]
+	gameIds: string[];
 }
 
 export interface IUserModel extends mongoose.Model<IUser> {
@@ -39,3 +35,7 @@ export interface IUserModel extends mongoose.Model<IUser> {
 }
 
 export let UserModel = <IUserModel>mongoose.model<IUser>('User', userSchema);
+
+userSchema.static('findByUsername', (username: string, callback?: (err: any, res: IUser) => void) => {
+	UserModel.findOne({ username: new RegExp(username, 'i') }, callback);
+});

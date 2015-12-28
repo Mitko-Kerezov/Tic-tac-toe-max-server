@@ -3,7 +3,6 @@
 import * as express from 'express';
 import * as http from 'http';
 import * as debugModule from 'debug';
-import * as routes from './routes/index';
 
 let env = process.env.NODE_ENV || 'development';
 let config = require('./config/config')[env];
@@ -12,22 +11,8 @@ let server = http.createServer(app);
 let debug = debugModule('Tic-Tac-Toe-Max:server');
 
 require('./config/mongoose')(config.db);
-
-app.use('/', routes);
-
-app.use((req, res, next) => {
-	let err: any = new Error('Not Found');
-	err['status'] = 404;
-	next(err);
-});
-
-app.use((err: any, req: express.Request, res: express.Response) => {
-	res.status(err['status'] || 500);
-	res.render('error', {
-		message: err.message,
-		error: err
-	});
-});
+require('./routes')(app);
+require('./errorHandlers')(app);
 
 app.set('port', config.port);
 

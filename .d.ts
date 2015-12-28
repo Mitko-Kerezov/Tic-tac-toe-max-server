@@ -1,6 +1,7 @@
 
 //grunt-start
 /// <reference path="app.ts" />
+/// <reference path="errorHandlers/index.ts" />
 /// <reference path="config/config.ts" />
 /// <reference path="config/mongoose.ts" />
 /// <reference path="utilities/encryption.ts" />
