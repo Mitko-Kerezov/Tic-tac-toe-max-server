@@ -9,6 +9,6 @@ module.exports = (app: express.Application) => {
 	app.post('/login', Authentication.login);
 	app.get('/logout', Authentication.logout);
 
-	app.post('/users', UsersController.postRegister);
-	app.post('/games', Authentication.isAuthenticated, GamesController.postRegister);
+	app.post('/register', UsersController.postRegister);
+	app.post('/create', Authentication.isAuthenticated, GamesController.postRegister);
 };
