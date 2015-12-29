@@ -11,12 +11,12 @@ function getEmptyBoard(): any[] {
 }
 
 export let gameSchema: mongoose.Schema = new mongoose.Schema({
-		board: {type: Array, default: getEmptyBoard()},
-		isOver: {type: Boolean, default: false},
-		gameResult: {type: String, enum: ['Still playing', 'Won by O', 'Won by X', 'Draw'], default: 'Still playing'},
-		currentPlayingBoard: {type: Number, validate: [/\d/, 'current playing board should be a one digit number'], default: 0},
-		currentPlayerSymbol: {type: String, enum: ['x', 'o'], default: 'x'}
-	});
-
+	board: {type: Array, default: getEmptyBoard()},
+	canJoin: { type: Boolean, default: true },
+	isOver: { type: Boolean, default: false },
+	gameResult: {type: String, enum: ['Still playing', 'Won by O', 'Won by X', 'Draw'], default: 'Still playing'},
+	currentPlayingBoard: {type: Number, validate: [/\d/, 'current playing board should be a one digit number'], default: 0},
+	currentPlayerSymbol: {type: String, enum: ['X', 'O'], required: true }
+});
 
 export let GameModel = mongoose.model<IGame>('Game', gameSchema);

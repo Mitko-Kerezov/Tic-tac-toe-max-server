@@ -18,14 +18,14 @@ export module Authentication {
 				return;
 			}
 
-			req.logIn(user, (err: any) => {
-				if (err) {
-					return next(err);
+			req.logIn(user, (innerErr: any) => {
+				if (innerErr) {
+					return next(innerErr);
 				}
 
 				debug('User %s logged in', req.user.username);
 				res.status(200).send({});
-			})
+			});
 		});
 
 		auth(req, res, next);

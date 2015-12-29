@@ -19,7 +19,7 @@ module.exports = () => {
 			} else {
 				return done(null, null);
 			}
-		})
+		});
 	}));
 
 	passport.serializeUser((user: IUser, done: (err: any, userId: mongoose.Types.ObjectId) => void) => {
@@ -29,7 +29,7 @@ module.exports = () => {
 	});
 
 	passport.deserializeUser((id: string, done: (err: any, user: IUser) => void) => {
-		UserModel.findOne({_id: id}).exec((err: any, user: IUser) => {
+		UserModel.findOne({ _id: id }).exec((err: any, user: IUser) => {
 			if (err) {
 				console.error('Error loading user: ' + err);
 				return;
@@ -40,6 +40,6 @@ module.exports = () => {
 			} else {
 				return done(null, null);
 			}
-		})
+		});
 	});
 };

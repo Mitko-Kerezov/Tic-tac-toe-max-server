@@ -5,6 +5,11 @@ import mongoose = require('mongoose');
 import {IUser} from 'Models';
 import {IUserModel} from 'Models';
 
+export let userGameSchema = new mongoose.Schema({
+	gameId: { type: String, required: true },
+	playerSymbol: { type: String, enum: ['x', 'o'], required: true }
+});
+
 export let UserModel = <IUserModel>mongoose.model<IUser>('User',
 	new mongoose.Schema({
 		username: { type: String, require: '{PATH} is required', unique: true },
@@ -12,7 +17,7 @@ export let UserModel = <IUserModel>mongoose.model<IUser>('User',
 		hashPass: { type: String, required: true},
 		wins: { type: Number, default: 0},
 		losses: { type: Number, default: 0},
-		gameIds: { type: Array, default: []},
+		games: { type: [userGameSchema], default: [] },
 	})
 	.method({
 		authenticate: (password: string, salt: string, hashPass: string): boolean => {

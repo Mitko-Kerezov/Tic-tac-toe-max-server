@@ -1,5 +1,6 @@
 interface IUserRequestData {
 username: string;
+
 password: string;
 confirmPassword: string;
 }
@@ -7,15 +8,13 @@ confirmPassword: string;
 declare module 'Models' {
 import mongoose = require('mongoose');
 
-export enum GameResult { 'Still playing', 'Won by O', 'Won by X', 'Draw' }
-export enum PlayerLetter { 'x', 'o' }
-
 export interface IGame extends mongoose.Document {
 board: any[];
+canJoin: boolean;
 isOver: boolean;
-gameResult: GameResult;
+gameResult: string;
 currentPlayingBoard: number;
-currentPlayerSymbol: PlayerLetter;
+currentPlayerSymbol: string;
 }
 
 export interface IUser extends mongoose.Document {
@@ -24,7 +23,7 @@ salt: string;
 hashPass: string;
 wins: number;
 losses: number;
-gameIds: string[];
+games: IUserGame[];
 
 authenticate(password: string, salt: string, hashPass: string): boolean;
 }
@@ -33,10 +32,10 @@ export interface IUserModel extends mongoose.Model<IUser> {
 findByUsername(username: string, callback?: (err: any, res: IUser) => void): mongoose.Query<IUser>;
 }
 
-// interface IUserGame {
-// gameId: string;
-// playerSymbol: mongoose.Model;
-// }
+export interface IUserGame {
+gameId: mongoose.Types.ObjectId;
+playerSymbol: string;
+}
 }
 
 //grunt-start
@@ -55,5 +54,7 @@ findByUsername(username: string, callback?: (err: any, res: IUser) => void): mon
 /// <reference path="utilities/validation.ts" />
 /// <reference path="routes/index.ts" />
 /// <reference path="data/models/Games.ts" />
+/// <reference path="data/models/ModelEnumerationOperations.ts" />
+/// <reference path="data/models/ModelEnumerations.ts" />
 /// <reference path="data/models/Users.ts" />
 //grunt-end

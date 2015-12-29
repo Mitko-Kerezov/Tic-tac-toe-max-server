@@ -2,7 +2,7 @@
 
 import * as express from 'express';
 import * as http from 'http';
-import {debug} from './utilities/debugging'
+import {debug} from './utilities/debugging';
 
 let env = process.env.NODE_ENV || 'development';
 let config = require('./config/config')[env];
