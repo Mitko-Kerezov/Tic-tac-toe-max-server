@@ -9,8 +9,11 @@ confirmPassword?: string;
 /// <reference path="controllers/gamesController.ts" />
 /// <reference path="controllers/usersController.ts" />
 /// <reference path="errorHandlers/index.ts" />
+/// <reference path="config/auth.ts" />
 /// <reference path="config/config.ts" />
+/// <reference path="config/express.ts" />
 /// <reference path="config/mongoose.ts" />
+/// <reference path="config/passport.ts" />
 /// <reference path="utilities/encryption.ts" />
 /// <reference path="utilities/errors.ts" />
 /// <reference path="utilities/validation.ts" />

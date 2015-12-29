@@ -2,7 +2,7 @@
 
 import * as express from 'express';
 
-module.exports = (app: express.IRouter<express.Application>) => {
+module.exports = (app: express.Application) => {
 	app.use((req, res, next) => {
 		let err: any = new Error('Page not found :sadpanda:');
 		err['status'] = 404;

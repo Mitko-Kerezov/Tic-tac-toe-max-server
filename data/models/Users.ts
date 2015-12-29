@@ -10,10 +10,12 @@ export interface IUser extends mongoose.Document {
 	wins: number;
 	losses: number;
 	gameIds: string[];
+
+	authenticate(password: string, salt: string, hashPass: string): boolean;
 }
 
 export interface IUserModel extends mongoose.Model<IUser> {
-	findByUsername(username: string, callback?: (err: any, res: IUser) => void): void;
+	findByUsername(username: string, callback?: (err: any, res: IUser) => void): mongoose.Query<IUser>;
 }
 
 export let UserModel = <IUserModel>mongoose.model<IUser>('User',
@@ -25,16 +27,16 @@ export let UserModel = <IUserModel>mongoose.model<IUser>('User',
 		losses: { type: Number, default: 0},
 		gameIds: { type: Array, default: []},
 	})
-	.static('findByUsername', (username: string, callback?: (err: any, res: IUser) => void) => {
-		UserModel.findOne({ username: new RegExp(username, 'i') }, callback);
-	})
 	.method({
-		authenticate: (password: string) => {
-			if (Encryption.generateHashedPassword(this.salt, password) === this.hashPass) {
+		authenticate: (password: string, salt: string, hashPass: string): boolean => {
+			if (Encryption.generateHashedPassword(salt, password) === hashPass) {
 				return true;
 			} else {
 				return false;
 			}
 		}
+	})
+	.static('findByUsername', (username: string, callback?: (err: any, res: IUser) => void): mongoose.Query<IUser> => {
+		return UserModel.findOne({ username: new RegExp(username, 'i') }, callback);
 	})
 );

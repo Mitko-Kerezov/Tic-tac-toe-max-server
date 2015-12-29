@@ -10,9 +10,11 @@ let app = express();
 let server = http.createServer(app);
 let debug = debugModule('Tic-Tac-Toe-Max:server');
 
+require('./config/express')(app);
 require('./config/mongoose')(config.db);
 require('./routes')(app);
 require('./errorHandlers')(app);
+require('./config/passport')(app);
 
 app.set('port', config.port);
 

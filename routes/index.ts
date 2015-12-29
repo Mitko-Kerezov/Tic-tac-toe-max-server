@@ -3,12 +3,12 @@
 import * as express from 'express';
 import {UsersController} from '../controllers/usersController';
 import {GamesController} from '../controllers/gamesController';
-import * as bodyParser from 'body-parser';
+import {Authentication} from '../config/auth';
 
-module.exports = (app: express.IRouter<express.Application>) => {
-	app.use(bodyParser.urlencoded({extended:true}));
-	app.use(bodyParser.json());
+module.exports = (app: express.Application) => {
+	app.post('/login', Authentication.login);
+	app.get('/logout', Authentication.logout);
 
 	app.post('/users', UsersController.postRegister);
-	app.post('/games', GamesController.postRegister);
+	app.post('/games', Authentication.isAuthenticated, GamesController.postRegister);
 };
