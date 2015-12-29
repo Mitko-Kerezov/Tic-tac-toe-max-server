@@ -3,8 +3,8 @@
 import * as passport from 'passport';
 import * as mongoose from 'mongoose';
 import {Strategy} from 'passport-local';
+import {IUser} from 'Models';
 import {UserModel} from '../data/models/Users';
-import {IUser} from '../data/models/Users';
 
 module.exports = () => {
 	passport.use(new Strategy((username: string, password: string, done: (err: any, user: IUser) => void) => {

@@ -2,13 +2,12 @@
 
 import * as express from 'express';
 import * as http from 'http';
-import * as debugModule from 'debug';
+import {debug} from './utilities/debugging'
 
 let env = process.env.NODE_ENV || 'development';
 let config = require('./config/config')[env];
 let app = express();
 let server = http.createServer(app);
-let debug = debugModule('Tic-Tac-Toe-Max:server');
 
 require('./config/express')(app);
 require('./config/mongoose')(config.db);

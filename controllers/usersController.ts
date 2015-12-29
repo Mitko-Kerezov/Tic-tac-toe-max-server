@@ -5,7 +5,8 @@ import {Encryption} from '../utilities/encryption';
 import {Validation} from '../utilities/validation';
 import {Errors} from '../utilities/errors';
 import {UserModel} from '../data/models/Users';
-import {IUser} from '../data/models/Users';
+import {IUser} from 'Models';
+import {debug} from '../utilities/debugging';
 
 export module UsersController {
 	export function postRegister(req: express.Request, res: express.Response, next: Function): void {
@@ -34,6 +35,7 @@ export module UsersController {
 			};
 
 			UserModel.create(user).then((createdUser: IUser) => {
+				debug('User %s registered', user.username);
 				res.status(201).send(createdUser);
 			}, (innerErr: any) => {
 				Errors.send(res, innerErr.message, innerErr.code || 500);

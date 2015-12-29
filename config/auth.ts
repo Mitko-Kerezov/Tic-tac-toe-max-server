@@ -2,8 +2,9 @@
 
 import * as passport from 'passport';
 import * as express from 'express';
-import {IUser} from '../data/models/Users';
+import {IUser} from 'Models';
 import {Errors} from '../utilities/errors';
+import {debug} from '../utilities/debugging';
 
 export module Authentication {
 	export function login(req: express.Request, res: express.Response, next: Function) {
@@ -22,6 +23,7 @@ export module Authentication {
 					return next(err);
 				}
 
+				debug('User %s logged in', req.user.username);
 				res.status(200).send({});
 			})
 		});
@@ -30,6 +32,7 @@ export module Authentication {
 	}
 
 	export function logout(req: express.Request, res: express.Response, next: Function) {
+		debug('User %s logged out', req.user.username);
 		req.logout();
 		res.status(200).send({});
 	}

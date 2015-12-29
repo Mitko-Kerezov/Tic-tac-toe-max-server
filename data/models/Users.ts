@@ -2,21 +2,8 @@
 
 import {Encryption} from '../../utilities/encryption';
 import mongoose = require('mongoose');
-
-export interface IUser extends mongoose.Document {
-	username: string;
-	salt: string;
-	hashPass: string;
-	wins: number;
-	losses: number;
-	gameIds: string[];
-
-	authenticate(password: string, salt: string, hashPass: string): boolean;
-}
-
-export interface IUserModel extends mongoose.Model<IUser> {
-	findByUsername(username: string, callback?: (err: any, res: IUser) => void): mongoose.Query<IUser>;
-}
+import {IUser} from 'Models';
+import {IUserModel} from 'Models';
 
 export let UserModel = <IUserModel>mongoose.model<IUser>('User',
 	new mongoose.Schema({
