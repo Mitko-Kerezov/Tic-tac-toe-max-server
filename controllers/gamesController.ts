@@ -106,9 +106,20 @@ export module GamesController {
 					updateObject["gameResult"] = newGameResult;
 					isGameDraw = newGameResult === ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.DRAW);
 					isGameWon = !isGameDraw;
-					// update both users' games
 				}
 			}
+
+			let targetGameBoardGameResult = game.board[makeMoveRequestData.cellRow][makeMoveRequestData.cellCol].gameResult;
+			let targetGameBoardRow = targetGameBoardGameResult === ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING) ?
+				makeMoveRequestData.cellRow :
+				Constants.PlayAnyWhere;
+			let targetGameBoardCol = targetGameBoardGameResult === ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING) ?
+				makeMoveRequestData.cellCol :
+				Constants.PlayAnyWhere;
+
+			updateObject["currentPlayingBoardRow"] = targetGameBoardRow;
+			updateObject["currentPlayingBoardCol"] = targetGameBoardCol;
+
 			GameModel.findByIdAndUpdate(userGame.gameId, { $set: updateObject }, (innerError: any, updatedGame: Models.IGame) => {
 				if (innerError) {
 					Errors.sendErrorObject(res, innerError);
