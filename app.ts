@@ -2,6 +2,7 @@
 
 import * as express from 'express';
 import * as http from 'http';
+import {Server} from 'ws';
 import {debug} from './utilities/debugging';
 
 let env = process.env.NODE_ENV || 'development';
@@ -25,3 +26,6 @@ server.on('listening', () => {
 		: 'port ' + addr.port;
 	debug('Listening on ' + bind);
 });
+
+let webSocketServer = new Server({ server: server });
+require('./routes/socket')(webSocketServer);

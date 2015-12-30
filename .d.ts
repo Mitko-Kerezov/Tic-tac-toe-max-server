@@ -68,6 +68,7 @@ gameResult: string;
 /// <reference path="utilities/errors.ts" />
 /// <reference path="utilities/validation.ts" />
 /// <reference path="routes/index.ts" />
+/// <reference path="routes/socket.ts" />
 /// <reference path="data/models/Games.ts" />
 /// <reference path="data/models/ModelEnumerationOperations.ts" />
 /// <reference path="data/models/ModelEnumerations.ts" />
