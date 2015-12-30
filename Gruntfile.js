@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 			},
 
 			devall: {
-				src: ["app.ts", "controllers/**/*.ts", "errorHandlers/**/*.ts", "config/**/*.ts", "utilities/**/*.ts", "routes/**/*.ts", "data/**/*.ts"],
+				src: ["app.ts", "constants.ts", "controllers/**/*.ts", "errorHandlers/**/*.ts", "config/**/*.ts", "utilities/**/*.ts", "routes/**/*.ts", "data/**/*.ts"],
 				reference: ".d.ts"
 			}
 		},
@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 		tslint: {
             build: {
                 files: {
-                    src: ["app.ts", "controllers/**/*.ts", "errorHandlers/**/*.ts", "config/**/*.ts", "utilities/**/*.ts", "routes/**/*.ts", "data/**/*.ts"]
+                    src: ["app.ts", "constants.ts", "controllers/**/*.ts", "errorHandlers/**/*.ts", "config/**/*.ts", "utilities/**/*.ts", "routes/**/*.ts", "data/**/*.ts"]
                 },
                 options: {
                     configuration: grunt.file.readJSON("./tslint.json")
@@ -30,7 +30,7 @@ module.exports = function(grunt) {
         },
 
 		clean: {
-            src: ["app.js", "controllers/**/*.js", "errorHandlers/**/*.js", "config/**/*.js", "utilities/**/*.js", "routes/**/*.js", "data/**/*.js"]
+            src: ["app.js", "constants.js", "controllers/**/*.js", "errorHandlers/**/*.js", "config/**/*.js", "utilities/**/*.js", "routes/**/*.js", "data/**/*.js"]
 		}
 	});
 

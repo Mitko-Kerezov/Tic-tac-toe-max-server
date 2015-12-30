@@ -32,4 +32,12 @@ export module ModelEnumerationOperations {
 	export function getRandomPlayerLetterAsString(): string {
 		return playerLetterAsString(~~(Math.random() * 2) ? ModelEnumerations.PlayerLetters.O : ModelEnumerations.PlayerLetters.X);
 	}
+
+	export function inversePlayerLetterAsString(playerLetter: string): string {
+		return playerLetterAsString(playerLetter === playerLetterAsString(ModelEnumerations.PlayerLetters.X) ? ModelEnumerations.PlayerLetters.O : ModelEnumerations.PlayerLetters.X);
+	}
+
+	export function getGameResultByPlayerLetterAsString(playerLetter: string): string {
+		return gameResultAsString(playerLetter === playerLetterAsString(ModelEnumerations.PlayerLetters.X) ? ModelEnumerations.GameResult.WON_BY_X : ModelEnumerations.GameResult.WON_BY_O);
+	}
 }

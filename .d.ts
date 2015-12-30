@@ -1,19 +1,28 @@
+/// <reference path='./typings/tsd.d.ts' />
+
 interface IUserRequestData {
 username: string;
-
 password: string;
 confirmPassword: string;
+}
+
+interface IMakeMoveRequestData {
+gameId: string;
+boardRow: number;
+boardCol: number;
+cellRow: number;
+cellCol: number;
 }
 
 declare module 'Models' {
 import mongoose = require('mongoose');
 
 export interface IGame extends mongoose.Document {
-board: any[];
+board: { [id: number] : { [id: number] : ISmallBoard } };
 canJoin: boolean;
-isOver: boolean;
 gameResult: string;
-currentPlayingBoard: number;
+currentPlayingBoardRow: number;
+currentPlayingBoardCol: number;
 currentPlayerSymbol: string;
 }
 
@@ -33,13 +42,19 @@ findByUsername(username: string, callback?: (err: any, res: IUser) => void): mon
 }
 
 export interface IUserGame {
-gameId: mongoose.Types.ObjectId;
+gameId: string;
 playerSymbol: string;
+}
+
+export interface ISmallBoard {
+tiles: string[][];
+gameResult: string;
 }
 }
 
 //grunt-start
 /// <reference path="app.ts" />
+/// <reference path="constants.ts" />
 /// <reference path="controllers/gamesController.ts" />
 /// <reference path="controllers/usersController.ts" />
 /// <reference path="errorHandlers/index.ts" />

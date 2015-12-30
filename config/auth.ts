@@ -24,7 +24,7 @@ export module Authentication {
 				}
 
 				debug('User %s logged in', req.user.username);
-				res.status(200).send({});
+				res.status(204).send({});
 			});
 		});
 
@@ -34,7 +34,7 @@ export module Authentication {
 	export function logout(req: express.Request, res: express.Response, next: Function) {
 		debug('User %s logged out', req.user.username);
 		req.logout();
-		res.status(200).send({});
+		res.status(204).send({});
 	}
 
 	export function isAuthenticated(req: express.Request, res: express.Response, next: Function) {
