@@ -55,7 +55,11 @@ export module UsersController {
 
 			UserModel.create(user).then((createdUser: IUser) => {
 				debug('User %s registered', user.username);
-				res.status(201).send(createdUser);
+				res.status(201).send({
+					username: createdUser.username,
+					wins: createdUser.wins,
+					losses: createdUser.losses
+				});
 			}, (innerErr: any) => {
 				Errors.send(res, innerErr.message, innerErr.code || 500);
 			});
