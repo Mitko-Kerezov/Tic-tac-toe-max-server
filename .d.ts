@@ -28,8 +28,8 @@ import mongoose = require('mongoose');
 export interface IGame extends mongoose.Document {
 board: { [id: number] : { [id: number] : ISmallBoard } };
 canJoin: boolean;
-userIds: string[];
 gameResult: string;
+users: { [id: number] : { username : string, id: string } };
 currentPlayingBoardRow: number;
 currentPlayingBoardCol: number;
 currentPlayerSymbol: string;

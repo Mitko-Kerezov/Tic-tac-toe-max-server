@@ -10,5 +10,6 @@ module.exports = (app: express.Application) => {
 
 	app.post('/register', UsersController.postRegister);
 	app.post('/create', Authentication.isAuthenticated, GamesController.postCreate);
+	app.get('/join', Authentication.isAuthenticated, GamesController.getCanJoin);
 	app.post('/join', Authentication.isAuthenticated, GamesController.postJoin);
 };

@@ -12,16 +12,37 @@ import {Constants} from "../constants";
 import {debug} from '../utilities/debugging';
 
 export module GamesController {
+	export function getCanJoin(req: express.Request, res: express.Response): void {
+		GameModel.find({
+			"canJoin": true,
+			"users.1.id": { $ne: req.user._id.toString() }
+
+		}, "_id, users.1.username", (err: any, games: any) => {
+			if (err) {
+				Errors.sendErrorObject(res, err);
+				return;
+			}
+
+			let result = games.map((game:any) => {
+				return {
+					id: game._id,
+					username: game.users[1].username
+				}
+			})
+			res.status(200).send(result);
+		});
+	}
+
 	export function postJoin(req: express.Request, res: express.Response): void {
 		let gameReference: IGameReference = req.body;
-		let userId: string = req.user._id;
+		let userId: string = req.user._id.toString();
 		GameModel.findById(gameReference.gameId, (err: any, game: Models.IGame) => {
 			if (!game) {
 				Errors.sendErrorObject(res, err || { message: 'Game does not exist', code: 400 });
 				return;
 			}
 
-			if (~game.userIds.indexOf(userId)) {
+			if (game.users[1].id === userId) {
 				Errors.send(res, 'Current user is already part of that game');
 				return;
 			}
@@ -32,8 +53,13 @@ export module GamesController {
 			}
 
 			let updateObject: any = {};
-			updateObject['$push'] = { "userIds": userId };
-			updateObject['$set'] = { "canJoin": false };
+			updateObject['$set'] = {
+				"canJoin": false,
+				"users.2": {
+					username: req.user.username,
+					id: userId
+				}
+			};
 
 			GameModel.findByIdAndUpdate(gameReference.gameId, updateObject, (innerGameErr: any, updatedGame: Models.IGame) => {
 				if (innerGameErr) {
@@ -60,7 +86,12 @@ export module GamesController {
 	export function postCreate(req: express.Request, res: express.Response): void {
 		GameModel.create({
 			currentPlayerSymbol: ModelEnumerationOperations.getRandomPlayerLetterAsString(),
-			userIds: [req.user._id]
+			users: {
+				'1': {
+					username: req.user.username,
+					id: req.user._id.toString()
+				}
+			}
 		}).then((createdGame: Models.IGame) => {
 			let userGame: Models.IUserGame = {
 				gameId: createdGame._id.toString(),
@@ -113,20 +144,20 @@ export module GamesController {
 				return;
 			}
 
-			if (!~game.userIds.indexOf(currentUser._id.toString())) {
-				getResponse('Current user is not involved in this game', true);
-				return;
-			}
-
 			if (game.gameResult !== ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING)) {
 				getResponse('Game is over', true);
 				return;
 			}
 
-			// if (game.canJoin) {
+			// if (game.canJoin || !game.users[2]) {
 			// 	getResponse('Current game has not yet started');
 			// 	return;
 			// }
+
+			if (game.users[1].id !== currentUser._id.toString() && game.users[2].id !== currentUser._id.toString()) {
+				getResponse('Current user is not involved in this game', true);
+				return;
+			}
 
 			if (game.currentPlayerSymbol !== userGame.playerSymbol) {
 				getResponse("Cannot make a move - not this player's turn", true);
