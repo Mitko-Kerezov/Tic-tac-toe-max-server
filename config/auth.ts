@@ -20,7 +20,7 @@ export module Authentication {
 
 			if (user && user.authenticate(password, user.salt, user.hashPass)) {
 				let token = jwt.sign(user, Constants.JWTSecret, { expiresIn: '1d'});
-
+				debug('User %s logged in', user.username);
 				res.status(200).send({ token: token });
 			} else {
 				res.status(401).send('Invalid credentials');
@@ -29,7 +29,9 @@ export module Authentication {
 	}
 
 	export function isAuthenticated(req: express.Request, res: express.Response, next: Function) {
-		jwt.verify(req.body.token, Constants.JWTSecret, (err: any, user: IUser) => {
+		let authHeader: string = req.headers['authorization'];
+		let token = authHeader.slice('Bearer '.length);
+		jwt.verify(token, Constants.JWTSecret, (err: any, user: IUser) => {
 			if (err) {
 				Errors.send(res, err.message || Constants.AuthenticationRequired, 401);
 			} else {
@@ -40,7 +42,7 @@ export module Authentication {
 					} else {
 						Errors.send(res, innerErr && innerErr.message || Constants.AuthenticationRequired, 401);
 					}
-				})
+				});
 			}
 		});
 	}

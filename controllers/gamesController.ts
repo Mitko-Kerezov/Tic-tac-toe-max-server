@@ -23,12 +23,12 @@ export module GamesController {
 				return;
 			}
 
-			let result = games.map((game:any) => {
+			let result = games.map((game: any) => {
 				return {
 					id: game._id,
 					username: game.users[1].username
-				}
-			})
+				};
+			});
 			res.status(200).send(result);
 		});
 	}
@@ -56,7 +56,7 @@ export module GamesController {
 			updateObject['$set'] = {
 				"canJoin": false,
 				"users.2": {
-					username: req.user.username,
+					opponent: req.user.username,
 					id: userId
 				}
 			};
@@ -113,9 +113,13 @@ export module GamesController {
 
 	export function makeMove(ws: WebSocket, makeMoveRequestData: IMakeMoveRequestData, currentUser: Models.IUser): void {
 		debug('User %s attempts to make a move %s', currentUser.username, JSON.stringify(makeMoveRequestData));
-		let getResponse = (message: string, isError: boolean, gameBoard?: { [id: number] : { [id: number] : Models.ISmallBoard } }) => {
+		let currentUserIdString = currentUser._id.toString();
+		let getResponse = (message: string,
+				isError: boolean,
+				gameBoard?: { [id: number] : { [id: number] : Models.ISmallBoard } },
+				usernames?: string[]) => {
 			ws.send(JSON.stringify({
-				username: currentUser.username,
+				usernames: usernames || [currentUser.username],
 				message: message,
 				isError: isError,
 				gameBoard: gameBoard
@@ -154,7 +158,7 @@ export module GamesController {
 			// 	return;
 			// }
 
-			if (game.users[1].id !== currentUser._id.toString() && game.users[2].id !== currentUser._id.toString()) {
+			if (game.users[1].id !== currentUserIdString && game.users[2].id !== currentUserIdString) {
 				getResponse('Current user is not involved in this game', true);
 				return;
 			}
@@ -220,23 +224,37 @@ export module GamesController {
 					return;
 				}
 
+				let otherUserIndex = updatedGame.users[1].id === currentUserIdString ? 2 : 1;
 				if (isGameWon) {
-					UserModel.findByIdAndUpdate(currentUser._id.toString(), { $inc: { "wins": 1 } }, (userErr: any, user: Models.IUser) => {
+					UserModel.findByIdAndUpdate(currentUserIdString, { $inc: { "wins": 1 } }, (userErr: any, user: Models.IUser) => {
 						if (userErr) {
 							getResponse(userErr.message, true);
 							return;
-						} else {
-							debug('User %s won a game', currentUser.username);
-							getResponse('Game over: WINNER', false, updatedGame.board);
+						}
+
+						debug('User %s WON game %s', user.username, userGame.gameId);
+						getResponse('Game over: WINNER', false, updatedGame.board);
+					});
+
+					UserModel.findByIdAndUpdate(updatedGame.users[otherUserIndex].id, { $inc: { "losses": 1 } }, (userErr: any, user: Models.IUser) => {
+						if (userErr) {
+							getResponse(userErr.message, true);
 							return;
 						}
+
+						debug('User %s lost game %s', user.username, userGame.gameId);
+						ws.send(JSON.stringify({
+							username: user.username,
+							message: 'Game over: WINNER',
+							isError: false
+						}));
+						getResponse('Game over: LOSER', false, updatedGame.board, [user.username]);
 					});
 				} else if (isGameDraw) {
-					getResponse('Game over: DRAW', false, updatedGame.board);
+					getResponse('Game over: DRAW', false, updatedGame.board, [updatedGame.users[otherUserIndex].username, currentUserIdString]);
 				} else {
-					getResponse('Move made', false, updatedGame.board);
+					getResponse('Move made', false, updatedGame.board, [updatedGame.users[otherUserIndex].username, currentUserIdString]);
 				}
-				// notify other user
 			});
 		});
 	}

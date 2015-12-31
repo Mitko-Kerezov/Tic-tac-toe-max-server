@@ -1,6 +1,5 @@
 /// <reference path='../.d.ts' />
 
-import {Server} from 'ws';
 import {Constants} from '../constants';
 import {IUser} from 'Models';
 import {Errors} from '../utilities/errors';
@@ -9,6 +8,7 @@ import {UserModel} from '../data/models/Users';
 import {GamesController} from '../controllers/gamesController';
 import * as jwt from 'jsonwebtoken';
 
+// Attempts to use WebSocket's type Server here lead to compile error :()
 module.exports = (server: any) => {
 	server.on('connection', (ws: WebSocket) => {
 
@@ -28,7 +28,7 @@ module.exports = (server: any) => {
 							}
 
 							GamesController.makeMove(ws, webSocketMessage.data, userInDb);
-						})
+						});
 					});
 				} catch	(err) {
 					debug(err);
