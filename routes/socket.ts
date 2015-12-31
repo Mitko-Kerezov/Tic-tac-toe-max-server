@@ -27,17 +27,7 @@ module.exports = (server: any) => {
 								return;
 							}
 
-							switch (webSocketMessage.purpose) {
-								case "move":
-									GamesController.makeMove(ws, webSocketMessage.data, userInDb);
-									break;
-
-								default:
-									ws.send(JSON.stringify({
-										message: 'Invalid purpose',
-										username: user.username
-									}));
-							}
+							GamesController.makeMove(ws, webSocketMessage.data, userInDb);
 						})
 					});
 				} catch	(err) {

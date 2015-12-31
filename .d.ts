@@ -6,8 +6,11 @@ password: string;
 confirmPassword: string;
 }
 
-interface IMakeMoveRequestData {
+interface IGameReference {
 gameId: string;
+}
+
+interface IMakeMoveRequestData extends IGameReference {
 boardRow: number;
 boardCol: number;
 cellRow: number;
@@ -16,7 +19,6 @@ cellCol: number;
 
 interface IWebSocketMessage {
 token: string;
-purpose: string;
 data: any;
 }
 
