@@ -30,6 +30,11 @@ export module Authentication {
 
 	export function isAuthenticated(req: express.Request, res: express.Response, next: Function) {
 		let authHeader: string = req.headers['authorization'];
+		if (!authHeader || !authHeader.length) {
+			Errors.send(res, Constants.AuthenticationRequired, 401);
+			return;
+		}
+
 		let token = authHeader.slice('Bearer '.length);
 		jwt.verify(token, Constants.JWTSecret, (err: any, user: IUser) => {
 			if (err) {
