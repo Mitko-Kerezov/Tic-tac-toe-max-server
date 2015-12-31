@@ -2,4 +2,6 @@
 
 export module Constants {
 	export let PlayAnyWhere = 3;
+	export let JWTSecret = 'This will be changed you know!';
+	export let AuthenticationRequired = 'Authentication required';
 }

@@ -23,6 +23,7 @@ function getEmptyBoard(): any[] {
 export let gameSchema: mongoose.Schema = new mongoose.Schema({
 	board: {type: Object, default: getEmptyBoard()},
 	canJoin: { type: Boolean, default: true },
+	userIds: { type: Array, required: true },
 	gameResult: { type: String, enum: ['Still playing', 'Won by O', 'Won by X', 'Draw'], default: 'Still playing' },
 	// 3 means you can play wherever you want
 	currentPlayingBoardRow: { type: Number, validate: [/[0-3]/, 'current playing board should be a one digit number'], default: Constants.PlayAnyWhere},

@@ -1,5 +1,6 @@
 /// <reference path='../.d.ts' />
 import * as express from 'express';
+import {IUser} from 'Models';
 
 export module Errors {
 	export function sendErrorObject(res: express.Response, error: any): void {
@@ -13,5 +14,10 @@ export module Errors {
 			message: err.message,
 			error: err
 		});
+	}
+
+	export function sendWebSocketError(ws: WebSocket, user: IUser, err: any) {
+		err.username = user.username;
+		ws.send(JSON.stringify(err));
 	}
 }

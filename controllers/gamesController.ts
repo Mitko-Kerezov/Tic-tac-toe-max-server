@@ -12,9 +12,10 @@ import {Constants} from "../constants";
 import {debug} from '../utilities/debugging';
 
 export module GamesController {
-	export function postRegister(req: express.Request, res: express.Response, next: Function): void {
+	export function postCreate(req: express.Request, res: express.Response, next: Function): void {
 		GameModel.create({
-			currentPlayerSymbol: ModelEnumerationOperations.getRandomPlayerLetterAsString()
+			currentPlayerSymbol: ModelEnumerationOperations.getRandomPlayerLetterAsString(),
+			userIds: [req.user._id]
 		}).then((createdGame: Models.IGame) => {
 			let userGame: Models.IUserGame = {
 				gameId: createdGame._id.toString(),
@@ -34,53 +35,63 @@ export module GamesController {
 		});
 	}
 
-	export function makeMove(req: express.Request, res: express.Response, next: Function): void {
-		let currentUser: Models.IUser = req.user;
-		let makeMoveRequestData: IMakeMoveRequestData = req.body;
-		debug('User %s attempts to make a move %s', req.user.username, JSON.stringify(makeMoveRequestData));
+	export function makeMove(ws: WebSocket, makeMoveRequestData: IMakeMoveRequestData, currentUser: Models.IUser): void {
+		debug('User %s attempts to make a move %s', currentUser.username, JSON.stringify(makeMoveRequestData));
+		let getResponse = (message: string) => {
+			ws.send(JSON.stringify({
+				username: currentUser.username,
+				message: message
+			}));
+		};
+
 		if (!Validation.checkMakeMoveData(makeMoveRequestData)) {
-			Errors.send(res, 'Invalid move - index out of bounds');
+			getResponse('Invalid move - index out of bounds');
 			return;
 		}
 
 		let userGame = currentUser.games.filter((game: Models.IUserGame) => game.gameId === makeMoveRequestData.gameId)[0];
 		if (!userGame) {
-			Errors.send(res, 'Current user is not involved in this game');
+			getResponse('Current user is not involved in this game');
 			return;
 		}
 
 		GameModel.findById(userGame.gameId, (err: any, game: Models.IGame) => {
 			if (err) {
-				Errors.sendErrorObject(res, err);
+				getResponse(err.message);
 				return;
 			}
 
-			if (!game) {
-				Errors.send(res, 'Current user is not involved in this game');
+			if (!game || !~game.userIds.indexOf(currentUser._id.toString())) {
+				getResponse('Current user is not involved in this game');
 				return;
 			}
 
 			if (game.gameResult !== ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING)) {
-				Errors.send(res, 'Current game is over');
+				getResponse('Current game is over');
 				return;
 			}
 
+			// if (game.canJoin) {
+			// 	getResponse('Current game has not yet started');
+			// 	return;
+			// }
+
 			if (game.currentPlayerSymbol !== userGame.playerSymbol) {
-				Errors.send(res, "Cannot make a move - not this player's turn");
+				getResponse("Cannot make a move - not this player's turn");
 				return;
 			}
 
 			if ((game.currentPlayingBoardRow !== Constants.PlayAnyWhere && game.currentPlayingBoardCol !== Constants.PlayAnyWhere &&
 				game.currentPlayingBoardRow !== makeMoveRequestData.boardRow && game.currentPlayingBoardCol !== makeMoveRequestData.boardCol) ||
 				game.board[makeMoveRequestData.boardRow][makeMoveRequestData.boardCol].gameResult !== ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING)) {
-				Errors.send(res, 'Cannot make a move on that board');
+				getResponse('Cannot make a move on that board');
 				return;
 			}
 
 			let currentSmallBoard = game.board[makeMoveRequestData.boardRow][makeMoveRequestData.boardCol];
 
 			if (currentSmallBoard.tiles[makeMoveRequestData.cellRow][makeMoveRequestData.cellCol]) {
-				Errors.send(res, 'Cannot make a move there - cell already taken');
+				getResponse('Cannot make a move there - cell already taken');
 				return;
 			}
 
@@ -122,26 +133,27 @@ export module GamesController {
 
 			GameModel.findByIdAndUpdate(userGame.gameId, { $set: updateObject }, (innerError: any, updatedGame: Models.IGame) => {
 				if (innerError) {
-					Errors.sendErrorObject(res, innerError);
+					getResponse(innerError.message);
 					return;
 				}
 
 				if (isGameWon) {
-					UserModel.findByIdAndUpdate(req.user._id, { $inc: { "wins": 1 } }, (userErr: any, user: Models.IUser) => {
+					UserModel.findByIdAndUpdate(currentUser._id.toString(), { $inc: { "wins": 1 } }, (userErr: any, user: Models.IUser) => {
 						if (userErr) {
-							Errors.sendErrorObject(res, userErr);
+							getResponse(userErr.message);
 							return;
 						} else {
-							debug('User %s created a game', req.user.username);
-							res.status(200).send('Game over: WINNER');
+							debug('User %s won a game', currentUser.username);
+							getResponse('Game over: WINNER');
+							return;
 						}
 					});
 				} else if (isGameDraw) {
-					res.status(200).send('Game over: DRAW');
+					getResponse('Game over: DRAW');
 				} else {
-					res.status(200).send('Move made');
+					getResponse('Move made');
 				}
-				// check isGameOver here and if needed update users table with wins/losses
+				// notify other user
 			});
 		});
 	}

@@ -1,47 +1,47 @@
 /// <reference path='../.d.ts' />
 
-import * as passport from 'passport';
 import * as express from 'express';
 import {IUser} from 'Models';
 import {Errors} from '../utilities/errors';
 import {debug} from '../utilities/debugging';
+import * as jwt from 'jsonwebtoken';
+import {UserModel} from '../data/models/Users';
+import {Constants} from '../constants';
 
 export module Authentication {
 	export function login(req: express.Request, res: express.Response, next: Function) {
-		let auth = passport.authenticate('local', (err: any, user: IUser) => {
-			if (err)  {
-				return next(err);
-			}
-
-			if (!user) {
-				Errors.send(res, "Invalid username or password!");
+		let username: string = req.body.username;
+		let password: string = req.body.password;
+		UserModel.findByUsername(username).exec((err: any, user: IUser) => {
+			if (err) {
+				Errors.sendErrorObject(res, err);
 				return;
 			}
 
-			req.logIn(user, (innerErr: any) => {
-				if (innerErr) {
-					return next(innerErr);
-				}
+			if (user && user.authenticate(password, user.salt, user.hashPass)) {
+				let token = jwt.sign(user, Constants.JWTSecret, { expiresIn: '1d'});
 
-				debug('User %s logged in', req.user.username);
-				res.status(204).send({});
-			});
+				res.status(200).send({ token: token });
+			} else {
+				res.status(401).send('Invalid credentials');
+			}
 		});
-
-		auth(req, res, next);
-	}
-
-	export function logout(req: express.Request, res: express.Response, next: Function) {
-		debug('User %s logged out', req.user.username);
-		req.logout();
-		res.status(204).send({});
 	}
 
 	export function isAuthenticated(req: express.Request, res: express.Response, next: Function) {
-		if (!req.isAuthenticated()) {
-			Errors.send(res, "Authentication required", 401);
-		} else {
-			next();
-		}
+		jwt.verify(req.body.token, Constants.JWTSecret, (err: any, user: IUser) => {
+			if (err) {
+				Errors.send(res, err.message || Constants.AuthenticationRequired, 401);
+			} else {
+				UserModel.findById(user._id.toString(), (innerErr: any, userInDb: IUser) => {
+					if (userInDb) {
+						req.user = userInDb;
+						next();
+					} else {
+						Errors.send(res, innerErr && innerErr.message || Constants.AuthenticationRequired, 401);
+					}
+				})
+			}
+		});
 	}
 };

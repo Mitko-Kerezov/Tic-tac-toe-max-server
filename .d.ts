@@ -14,12 +14,19 @@ cellRow: number;
 cellCol: number;
 }
 
+interface IWebSocketMessage {
+token: string;
+purpose: string;
+data: any;
+}
+
 declare module 'Models' {
 import mongoose = require('mongoose');
 
 export interface IGame extends mongoose.Document {
 board: { [id: number] : { [id: number] : ISmallBoard } };
 canJoin: boolean;
+userIds: string[];
 gameResult: string;
 currentPlayingBoardRow: number;
 currentPlayingBoardCol: number;
@@ -62,7 +69,6 @@ gameResult: string;
 /// <reference path="config/config.ts" />
 /// <reference path="config/express.ts" />
 /// <reference path="config/mongoose.ts" />
-/// <reference path="config/passport.ts" />
 /// <reference path="utilities/debugging.ts" />
 /// <reference path="utilities/encryption.ts" />
 /// <reference path="utilities/errors.ts" />
