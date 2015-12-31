@@ -29,6 +29,7 @@ export module GamesController {
 					username: game.users[1].username
 				};
 			});
+
 			res.status(200).send(result);
 		});
 	}
@@ -114,71 +115,65 @@ export module GamesController {
 	export function makeMove(ws: WebSocket, makeMoveRequestData: IMakeMoveRequestData, currentUser: Models.IUser): void {
 		debug('User %s attempts to make a move %s', currentUser.username, JSON.stringify(makeMoveRequestData));
 		let currentUserIdString = currentUser._id.toString();
-		let getResponse = (message: string,
-				isError: boolean,
-				gameBoard?: { [id: number] : { [id: number] : Models.ISmallBoard } },
-				usernames?: string[]) => {
-			ws.send(JSON.stringify({
-				usernames: usernames || [currentUser.username],
-				message: message,
-				isError: isError,
-				gameBoard: gameBoard
-			}));
-		};
+
 
 		if (!Validation.checkMakeMoveData(makeMoveRequestData)) {
-			getResponse('Invalid move - index out of bounds', true);
+			getResponse(ws, 'Invalid move - index out of bounds', true, [currentUser.username]);
 			return;
 		}
 
 		let userGame = currentUser.games.filter((game: Models.IUserGame) => game.gameId === makeMoveRequestData.gameId)[0];
 		if (!userGame) {
-			getResponse('Current user is not involved in this game', true);
+			getResponse(ws, 'Current user is not involved in this game', true, [currentUser.username]);
 			return;
 		}
 
 		GameModel.findById(userGame.gameId, (err: any, game: Models.IGame) => {
 			if (err) {
-				getResponse(err.message, true);
+				getResponse(ws, err.message, true, [currentUser.username]);
 				return;
 			}
 
 			if (!game) {
-				getResponse('Game does not exist', true);
+				getResponse(ws, 'Game does not exist', true, [currentUser.username]);
 				return;
 			}
 
 			if (game.gameResult !== ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING)) {
-				getResponse('Game is over', true);
+				getResponse(ws, 'Game is over', true, [currentUser.username]);
 				return;
 			}
 
-			// if (game.canJoin || !game.users[2]) {
-			// 	getResponse('Current game has not yet started');
-			// 	return;
-			// }
+			if (game.canJoin || !game.users[2]) {
+				getResponse(ws, 'Current game has not yet started', true, [currentUser.username]);
+				return;
+			}
 
 			if (game.users[1].id !== currentUserIdString && game.users[2].id !== currentUserIdString) {
-				getResponse('Current user is not involved in this game', true);
+				getResponse(ws, 'Current user is not involved in this game', true, [currentUser.username]);
 				return;
 			}
 
 			if (game.currentPlayerSymbol !== userGame.playerSymbol) {
-				getResponse("Cannot make a move - not this player's turn", true);
+				getResponse(ws, "Cannot make a move - not this player's turn", true, [currentUser.username]);
 				return;
 			}
 
-			if ((game.currentPlayingBoardRow !== Constants.PlayAnyWhere && game.currentPlayingBoardCol !== Constants.PlayAnyWhere &&
-				game.currentPlayingBoardRow !== makeMoveRequestData.boardRow && game.currentPlayingBoardCol !== makeMoveRequestData.boardCol) ||
-				game.board[makeMoveRequestData.boardRow][makeMoveRequestData.boardCol].gameResult !== ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING)) {
-				getResponse('Cannot make a move on that board', true);
+			if ((game.currentPlayingBoardRow !== makeMoveRequestData.boardRow && game.currentPlayingBoardRow !== Constants.PlayAnyWhere) ||
+				(game.currentPlayingBoardCol !== makeMoveRequestData.boardCol && game.currentPlayingBoardCol !== Constants.PlayAnyWhere)) {
+				getResponse(ws, "That's not the target board", true, [currentUser.username]);
+				return;
+			}
+
+			if (game.board[makeMoveRequestData.boardRow][makeMoveRequestData.boardCol].gameResult !== ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING)) {
+				getResponse(ws, 'This board is already finished', true, [currentUser.username]);
 				return;
 			}
 
 			let currentSmallBoard = game.board[makeMoveRequestData.boardRow][makeMoveRequestData.boardCol];
 
 			if (currentSmallBoard.tiles[makeMoveRequestData.cellRow][makeMoveRequestData.cellCol]) {
-				getResponse('Cannot make a move there - cell already taken', true);
+				getResponse(ws, 'Cannot make a move there - cell already taken', true, [currentUser.username]);
 				return;
 			}
 
@@ -220,7 +215,7 @@ export module GamesController {
 
 			GameModel.findByIdAndUpdate(userGame.gameId, { $set: setUpdateObject }, { new: true }, (innerError: any, updatedGame: Models.IGame) => {
 				if (innerError) {
-					getResponse(innerError.message, true);
+					getResponse(ws, innerError.message, true, [currentUser.username]);
 					return;
 				}
 
@@ -228,17 +223,17 @@ export module GamesController {
 				if (isGameWon) {
 					UserModel.findByIdAndUpdate(currentUserIdString, { $inc: { "wins": 1 } }, (userErr: any, user: Models.IUser) => {
 						if (userErr) {
-							getResponse(userErr.message, true);
+							getResponse(ws, userErr.message, true, [currentUser.username]);
 							return;
 						}
 
 						debug('User %s WON game %s', user.username, userGame.gameId);
-						getResponse('Game over: WINNER', false, updatedGame.board);
+						getResponse(ws, 'Game over: WINNER', false, [currentUser.username], updatedGame.board);
 					});
 
 					UserModel.findByIdAndUpdate(updatedGame.users[otherUserIndex].id, { $inc: { "losses": 1 } }, (userErr: any, user: Models.IUser) => {
 						if (userErr) {
-							getResponse(userErr.message, true);
+							getResponse(ws, userErr.message, true, [currentUser.username]);
 							return;
 						}
 
@@ -248,14 +243,37 @@ export module GamesController {
 							message: 'Game over: WINNER',
 							isError: false
 						}));
-						getResponse('Game over: LOSER', false, updatedGame.board, [user.username]);
+						getResponse(ws, 'Game over: LOSER', false, [user.username], updatedGame.board);
 					});
 				} else if (isGameDraw) {
-					getResponse('Game over: DRAW', false, updatedGame.board, [updatedGame.users[otherUserIndex].username, currentUserIdString]);
+					getResponse(ws, 'Game over: DRAW', false, [updatedGame.users[otherUserIndex].username, currentUser.username], updatedGame.board);
 				} else {
-					getResponse('Move made', false, updatedGame.board, [updatedGame.users[otherUserIndex].username, currentUserIdString]);
+					getResponse(ws,
+						'Move made',
+						false,
+						[updatedGame.users[otherUserIndex].username, currentUser.username],
+						updatedGame.board,
+						{
+							row: updatedGame.currentPlayingBoardRow,
+							col: updatedGame.currentPlayingBoardCol
+						});
 				}
 			});
 		});
 	}
+
+	function getResponse(ws: WebSocket,
+		message: string,
+		isError: boolean,
+		usernames: string[],
+		board?: { [id: number]: { [id: number]: Models.ISmallBoard } },
+		nextBoard?: {row: number, col: number}) {
+		ws.send(JSON.stringify({
+			usernames: usernames,
+			message: message,
+			isError: isError,
+			board: board,
+			nextBoard: nextBoard
+		}));
+	};
 };
