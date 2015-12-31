@@ -116,7 +116,6 @@ export module GamesController {
 		debug('User %s attempts to make a move %s', currentUser.username, JSON.stringify(makeMoveRequestData));
 		let currentUserIdString = currentUser._id.toString();
 
-
 		if (!Validation.checkMakeMoveData(makeMoveRequestData)) {
 			getResponse(ws, 'Invalid move - index out of bounds', true, [currentUser.username]);
 			return;

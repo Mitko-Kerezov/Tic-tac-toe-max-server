@@ -9,6 +9,25 @@ import {IUser} from 'Models';
 import {debug} from '../utilities/debugging';
 
 export module UsersController {
+	export function getStatus(req: express.Request, res: express.Response): void {
+		UserModel.findById(req.user._id, (err: any, user: IUser) => {
+			if (err) {
+				Errors.sendErrorObject(res, err);
+				return;
+			}
+
+			if (!user) {
+				Errors.send(res, 'User does not exist');
+				return;
+			}
+
+			res.status(200).send({
+				wins: user.wins,
+				losses: user.losses
+			});
+		});
+	}
+
 	export function postRegister(req: express.Request, res: express.Response, next: Function): void {
 		let userRequestData: IUserRequestData = req.body;
 		if (!Validation.checkUsername(userRequestData.username)) {
