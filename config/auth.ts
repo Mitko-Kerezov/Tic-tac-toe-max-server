@@ -12,6 +12,11 @@ export module Authentication {
 	export function login(req: express.Request, res: express.Response, next: Function) {
 		let username: string = req.body.username;
 		let password: string = req.body.password;
+		if (!username || !password) {
+			res.status(401).send('Invalid credentials');
+			return;
+		}
+
 		UserModel.findByUsername(username).exec((err: any, user: IUser) => {
 			if (err) {
 				Errors.sendErrorObject(res, err);
