@@ -11,10 +11,11 @@ import * as jwt from 'jsonwebtoken';
 // Attempts to use WebSocket's type Server here lead to compile error :()
 module.exports = (server: any) => {
 	server.on('connection', (ws: WebSocket) => {
-
+			debug("Connection received");
 			ws.onmessage = (message: MessageEvent) => {
 				try {
 					let webSocketMessage: IWebSocketMessage = JSON.parse(message.data);
+					debug("Websocket message %s", JSON.stringify(webSocketMessage, null, 2));
 					jwt.verify(webSocketMessage.token, Constants.JWTSecret, (err: any, user: IUser) => {
 						if (err) {
 							Errors.sendWebSocketError(ws, user, err);

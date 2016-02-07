@@ -76,7 +76,7 @@ export module GamesController {
 							Errors.sendErrorObject(res, innerUserErr);
 						} else {
 							debug('User %s joined game with id %s', req.user.username, gameReference.gameId);
-							res.status(204).send({});
+							res.status(200).send(updatedGame);
 						}
 					});
 				}
@@ -237,16 +237,12 @@ export module GamesController {
 						}
 
 						debug('User %s lost game %s', user.username, userGame.gameId);
-						ws.send(JSON.stringify({
-							username: user.username,
-							message: 'Game over: WINNER',
-							isError: false
-						}));
 						getResponse(ws, 'Game over: LOSER', false, [user.username], updatedGame.board);
 					});
 				} else if (isGameDraw) {
 					getResponse(ws, 'Game over: DRAW', false, [updatedGame.users[otherUserIndex].username, currentUser.username], updatedGame.board);
 				} else {
+					debug('User %s made move successfully', currentUser.username)
 					getResponse(ws,
 						'Move made',
 						false,
