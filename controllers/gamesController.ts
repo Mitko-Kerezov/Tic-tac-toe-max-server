@@ -9,6 +9,7 @@ import * as Models from 'Models';
 import {ModelEnumerationOperations} from '../data/models/ModelEnumerationOperations';
 import {ModelEnumerations} from '../data/models/ModelEnumerations';
 import {Constants} from "../constants";
+import {Server} from 'ws';
 import {debug} from '../utilities/debugging';
 
 export module GamesController {
@@ -57,7 +58,7 @@ export module GamesController {
 			updateObject['$set'] = {
 				"canJoin": false,
 				"users.2": {
-					opponent: req.user.username,
+					username: req.user.username,
 					id: userId
 				}
 			};
@@ -112,67 +113,67 @@ export module GamesController {
 		});
 	}
 
-	export function makeMove(ws: WebSocket, makeMoveRequestData: IMakeMoveRequestData, currentUser: Models.IUser): void {
+	export function makeMove(ws: WebSocket, makeMoveRequestData: IMakeMoveRequestData, currentUser: Models.IUser, webSocketServer: Server): void {
 		debug('User %s attempts to make a move %s', currentUser.username, JSON.stringify(makeMoveRequestData));
 		let currentUserIdString = currentUser._id.toString();
 
 		if (!Validation.checkMakeMoveData(makeMoveRequestData)) {
-			getResponse(ws, 'Invalid move - index out of bounds', true, [currentUser.username]);
+			getResponse(webSocketServer, ws, 'Invalid move - index out of bounds', true, [currentUser.username]);
 			return;
 		}
 
 		let userGame = currentUser.games.filter((game: Models.IUserGame) => game.gameId === makeMoveRequestData.gameId)[0];
 		if (!userGame) {
-			getResponse(ws, 'Current user is not involved in this game', true, [currentUser.username]);
+			getResponse(webSocketServer, ws, 'Current user is not involved in this game', true, [currentUser.username]);
 			return;
 		}
 
 		GameModel.findById(userGame.gameId, (err: any, game: Models.IGame) => {
 			if (err) {
-				getResponse(ws, err.message, true, [currentUser.username]);
+				getResponse(webSocketServer, ws, err.message, true, [currentUser.username]);
 				return;
 			}
 
 			if (!game) {
-				getResponse(ws, 'Game does not exist', true, [currentUser.username]);
+				getResponse(webSocketServer, ws, 'Game does not exist', true, [currentUser.username]);
 				return;
 			}
 
 			if (game.gameResult !== ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING)) {
-				getResponse(ws, 'Game is over', true, [currentUser.username]);
+				getResponse(webSocketServer, ws, 'Game is over', true, [currentUser.username]);
 				return;
 			}
 
 			if (game.canJoin || !game.users[2]) {
-				getResponse(ws, 'Current game has not yet started', true, [currentUser.username]);
+				getResponse(webSocketServer, ws, 'Current game has not yet started', true, [currentUser.username]);
 				return;
 			}
 
 			if (game.users[1].id !== currentUserIdString && game.users[2].id !== currentUserIdString) {
-				getResponse(ws, 'Current user is not involved in this game', true, [currentUser.username]);
+				getResponse(webSocketServer, ws, 'Current user is not involved in this game', true, [currentUser.username]);
 				return;
 			}
 
 			if (game.currentPlayerSymbol !== userGame.playerSymbol) {
-				getResponse(ws, "Cannot make a move - not this player's turn", true, [currentUser.username]);
+				getResponse(webSocketServer, ws, "Cannot make a move - not this player's turn", true, [currentUser.username]);
 				return;
 			}
 
 			if ((game.currentPlayingBoardRow !== makeMoveRequestData.boardRow && game.currentPlayingBoardRow !== Constants.PlayAnyWhere) ||
 				(game.currentPlayingBoardCol !== makeMoveRequestData.boardCol && game.currentPlayingBoardCol !== Constants.PlayAnyWhere)) {
-				getResponse(ws, "That's not the target board", true, [currentUser.username]);
+				getResponse(webSocketServer, ws, "That's not the target board", true, [currentUser.username]);
 				return;
 			}
 
 			if (game.board[makeMoveRequestData.boardRow][makeMoveRequestData.boardCol].gameResult !== ModelEnumerationOperations.gameResultAsString(ModelEnumerations.GameResult.STILL_PLAYING)) {
-				getResponse(ws, 'This board is already finished', true, [currentUser.username]);
+				getResponse(webSocketServer, ws, 'This board is already finished', true, [currentUser.username]);
 				return;
 			}
 
 			let currentSmallBoard = game.board[makeMoveRequestData.boardRow][makeMoveRequestData.boardCol];
 
 			if (currentSmallBoard.tiles[makeMoveRequestData.cellRow][makeMoveRequestData.cellCol]) {
-				getResponse(ws, 'Cannot make a move there - cell already taken', true, [currentUser.username]);
+				getResponse(webSocketServer, ws, 'Cannot make a move there - cell already taken', true, [currentUser.username]);
 				return;
 			}
 
@@ -214,7 +215,7 @@ export module GamesController {
 
 			GameModel.findByIdAndUpdate(userGame.gameId, { $set: setUpdateObject }, { new: true }, (innerError: any, updatedGame: Models.IGame) => {
 				if (innerError) {
-					getResponse(ws, innerError.message, true, [currentUser.username]);
+					getResponse(webSocketServer, ws, innerError.message, true, [currentUser.username]);
 					return;
 				}
 
@@ -222,28 +223,28 @@ export module GamesController {
 				if (isGameWon) {
 					UserModel.findByIdAndUpdate(currentUserIdString, { $inc: { "wins": 1 } }, (userErr: any, user: Models.IUser) => {
 						if (userErr) {
-							getResponse(ws, userErr.message, true, [currentUser.username]);
+							getResponse(webSocketServer, ws, userErr.message, true, [currentUser.username]);
 							return;
 						}
 
 						debug('User %s WON game %s', user.username, userGame.gameId);
-						getResponse(ws, 'Game over: WINNER', false, [currentUser.username], updatedGame.board);
+						getResponse(webSocketServer, ws, 'Game over: WINNER', false, [currentUser.username], updatedGame.board);
 					});
 
 					UserModel.findByIdAndUpdate(updatedGame.users[otherUserIndex].id, { $inc: { "losses": 1 } }, (userErr: any, user: Models.IUser) => {
 						if (userErr) {
-							getResponse(ws, userErr.message, true, [currentUser.username]);
+							getResponse(webSocketServer, ws, userErr.message, true, [currentUser.username]);
 							return;
 						}
 
 						debug('User %s lost game %s', user.username, userGame.gameId);
-						getResponse(ws, 'Game over: LOSER', false, [user.username], updatedGame.board);
+						getResponse(webSocketServer, ws, 'Game over: LOSER', false, [user.username], updatedGame.board);
 					});
 				} else if (isGameDraw) {
-					getResponse(ws, 'Game over: DRAW', false, [updatedGame.users[otherUserIndex].username, currentUser.username], updatedGame.board);
+					getResponse(webSocketServer, ws, 'Game over: DRAW', false, [updatedGame.users[otherUserIndex].username, currentUser.username], updatedGame.board);
 				} else {
 					debug('User %s made move successfully', currentUser.username)
-					getResponse(ws,
+					getResponse(webSocketServer, ws,
 						'Move made',
 						false,
 						[updatedGame.users[otherUserIndex].username, currentUser.username],
@@ -257,18 +258,27 @@ export module GamesController {
 		});
 	}
 
-	function getResponse(ws: WebSocket,
+	function getResponse(server: Server,
+		ws: WebSocket,
 		message: string,
 		isError: boolean,
 		usernames: string[],
 		board?: { [id: number]: { [id: number]: Models.ISmallBoard } },
 		nextBoard?: {row: number, col: number}) {
-		ws.send(JSON.stringify({
-			usernames: usernames,
-			message: message,
-			isError: isError,
-			board: board,
-			nextBoard: nextBoard
-		}));
+			let messageObject = {
+				usernames: usernames,
+				message: message,
+				isError: isError,
+				board: board,
+				nextBoard: nextBoard
+			};
+
+			if (isError) {
+				ws.send(JSON.stringify(messageObject));
+			} else {
+				server.clients.forEach(client => {
+					client.send(JSON.stringify(messageObject));
+				})
+			}
 	};
 };
