@@ -28,7 +28,7 @@ module.exports = (server: any) => {
 								return;
 							}
 
-							GamesController.makeMove(ws, webSocketMessage.data, userInDb);
+							GamesController.makeMove(ws, webSocketMessage.data, userInDb, server);
 						});
 					});
 				} catch	(err) {
