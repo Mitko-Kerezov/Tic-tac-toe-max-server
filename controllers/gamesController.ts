@@ -78,7 +78,7 @@ export module GamesController {
 							Errors.sendErrorObject(res, innerUserErr);
 						} else {
 							debug('User %s joined game with id %s', req.user.username, gameReference.gameId);
-							getResponse(webSocketServer, null, util.format("%s joined the game", req.user.username), false, [game.users[1].username])
+							getResponse(webSocketServer, null, util.format("%s joined the game", req.user.username), false, [game.users[1].username]);
 							res.status(200).send(updatedGame);
 						}
 					});
@@ -245,7 +245,7 @@ export module GamesController {
 				} else if (isGameDraw) {
 					getResponse(webSocketServer, ws, 'Game over: DRAW', false, [updatedGame.users[otherUserIndex].username, currentUser.username], updatedGame.board);
 				} else {
-					debug('User %s made move successfully', currentUser.username)
+					debug('User %s made move successfully', currentUser.username);
 					getResponse(webSocketServer, ws,
 						'Move made',
 						false,
@@ -280,7 +280,7 @@ export module GamesController {
 			} else {
 				server.clients.forEach(client => {
 					client.send(JSON.stringify(messageObject));
-				})
+				});
 			}
 	};
 };
