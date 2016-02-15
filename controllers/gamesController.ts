@@ -252,8 +252,8 @@ export module GamesController {
 						[updatedGame.users[otherUserIndex].username, currentUser.username],
 						updatedGame.board,
 						{
-							row: updatedGame.currentPlayingBoardRow,
-							col: updatedGame.currentPlayingBoardCol
+							boardRow: updatedGame.currentPlayingBoardRow,
+							boardCol: updatedGame.currentPlayingBoardCol
 						},
 						updatedGame.currentPlayerSymbol);
 				}
@@ -266,8 +266,8 @@ export module GamesController {
 		message: string,
 		isError: boolean,
 		usernames: string[],
-		board?: { [id: number]: { [id: number]: Models.ISmallBoard } },
-		nextBoard?: {row: number, col: number},
+		board?: Models.IBoard,
+		nextBoard?: Models.IBoardCoordinates,
 		currentPlayerSymbol?: string) {
 			let messageObject = {
 				usernames: usernames,

@@ -25,8 +25,17 @@ data: any;
 declare module 'Models' {
 import mongoose = require('mongoose');
 
+export interface IBoard {
+[id: number] : { [id: number] : ISmallBoard }
+}
+
+export interface IBoardCoordinates {
+boardRow: number;
+boardCol: number;
+}
+
 export interface IGame extends mongoose.Document {
-board: { [id: number] : { [id: number] : ISmallBoard } };
+board: IBoard;
 canJoin: boolean;
 gameResult: string;
 users: { [id: number] : { username : string, id: string } };
