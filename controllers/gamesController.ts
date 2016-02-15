@@ -254,7 +254,8 @@ export module GamesController {
 						{
 							row: updatedGame.currentPlayingBoardRow,
 							col: updatedGame.currentPlayingBoardCol
-						});
+						},
+						updatedGame.currentPlayerSymbol);
 				}
 			});
 		});
@@ -266,13 +267,15 @@ export module GamesController {
 		isError: boolean,
 		usernames: string[],
 		board?: { [id: number]: { [id: number]: Models.ISmallBoard } },
-		nextBoard?: {row: number, col: number}) {
+		nextBoard?: {row: number, col: number},
+		currentPlayerSymbol?: string) {
 			let messageObject = {
 				usernames: usernames,
 				message: message,
 				isError: isError,
 				board: board,
-				nextBoard: nextBoard
+				nextBoard: nextBoard,
+				currentPlayerSymbol: currentPlayerSymbol
 			};
 
 			if (isError && ws) {
