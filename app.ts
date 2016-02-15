@@ -9,11 +9,13 @@ let env = process.env.NODE_ENV || 'development';
 let config = require('./config/config')[env];
 let app = express();
 let server = http.createServer(app);
+let webSocketServer = new Server({ server: server });
 
 require('./config/express')(app);
 require('./config/mongoose')(config.db);
-require('./routes')(app);
+require('./routes')(app, webSocketServer);
 require('./errorHandlers')(app);
+require('./routes/socket')(webSocketServer);
 
 app.set('port', config.port);
 
@@ -26,5 +28,3 @@ server.on('listening', () => {
 	debug('Listening on ' + bind);
 });
 
-let webSocketServer = new Server({ server: server });
-require('./routes/socket')(webSocketServer);

@@ -1,6 +1,7 @@
 /// <reference path='../.d.ts' />
 
 import * as express from 'express';
+import * as util from 'util';
 import {Errors} from '../utilities/errors';
 import {Validation} from '../utilities/validation';
 import {UserModel} from '../data/models/Users';
@@ -35,7 +36,7 @@ export module GamesController {
 		});
 	}
 
-	export function postJoin(req: express.Request, res: express.Response): void {
+	export function postJoin(req: express.Request, res: express.Response, webSocketServer: Server): void {
 		let gameReference: IGameReference = req.body;
 		let userId: string = req.user._id.toString();
 		GameModel.findById(gameReference.gameId, (err: any, game: Models.IGame) => {
@@ -77,6 +78,7 @@ export module GamesController {
 							Errors.sendErrorObject(res, innerUserErr);
 						} else {
 							debug('User %s joined game with id %s', req.user.username, gameReference.gameId);
+							getResponse(webSocketServer, null, util.format("%s joined the game", req.user.username), false, [game.users[1].username])
 							res.status(200).send(updatedGame);
 						}
 					});
@@ -273,7 +275,7 @@ export module GamesController {
 				nextBoard: nextBoard
 			};
 
-			if (isError) {
+			if (isError && ws) {
 				ws.send(JSON.stringify(messageObject));
 			} else {
 				server.clients.forEach(client => {
