@@ -18,4 +18,4 @@ Lastly, run **$ npm start**
 
 # Debug logs
 If you'd like to view debug logs, the environment variable **Debug** must be set to **Tic-Tac-Toe-Max:***.
-This can be achieved using **$ export Debug=Tic-Tac-Toe-Max:***
+This can be achieved using $ export Debug=Tic-Tac-Toe-Max:*
