@@ -10,7 +10,7 @@ The Mobile Client consuming the server can be found [here](https://github.com/Mi
 # Starting
 After cloning run **$ npm install**
 
-If you don't have (grunt-cli)[https://www.npmjs.com/package/grunt-cli] install it globally using **$ npm i -g grunt-cli**.
+If you don't have [grunt-cli](https://www.npmjs.com/package/grunt-cli) install it globally using **$ npm i -g grunt-cli**.
 
 Run **$ ./node_modules/.bin/tsd reinstall -o** for downloading the definition files.
 
