@@ -1,5 +1,5 @@
 # Tic-tac-toe-max-server
-Server for the Tic Tac Toe Max game. Part of the project for FMI's Advanced JS course.
+Server for the Tic Tac Toe Max game.
 
 Realization was achieved using TypeScript as a programming language, developed under [Sublime Text](https://www.sublimetext.com) and [VS Code](https://code.visualstudio.com).
 
