@@ -8,11 +8,9 @@ The actual playing (making a move) was realized using the [ws npm package](https
 The Mobile Client consuming the server can be found [here](https://github.com/Mitko-Kerezov/Tic-Tac-Toe-Max-MobileClient).
 
 # Starting
-After cloning run **$ npm install**
-
-If you don't have [grunt-cli](https://www.npmjs.com/package/grunt-cli) install it globally using **$ npm i -g grunt-cli**.
-
-Run **$ ./node_modules/.bin/tsd reinstall -o** for downloading the definition files.
+After cloning run **$ npm install**, a **postinstall** script will execute, if it passes without error you only have to run **$ npm start**. If it doesn't pass you have to:
+* install [grunt-cli](https://www.npmjs.com/package/grunt-cli) globally using **$ npm i -g grunt-cli**.
+* run **$ ./node_modules/.bin/tsd reinstall -o** for downloading the definition files.
 
 Lastly, run **$ npm start**
 
