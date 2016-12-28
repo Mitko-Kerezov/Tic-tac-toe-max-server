@@ -1,5 +1,11 @@
 /// <reference path='./typings/tsd.d.ts' />
 
+interface IFacebookResponse {
+error?: NodeJS.ErrnoException;
+id: string;
+name: string;
+}
+
 interface IUserRequestData {
 username: string;
 password: string;
@@ -44,10 +50,13 @@ currentPlayingBoardCol: number;
 currentPlayerSymbol: string;
 }
 
-export interface IUser extends mongoose.Document {
+export interface ICoreUser {
 username: string;
 salt: string;
 hashPass: string;
+}
+
+export interface IUser extends ICoreUser, mongoose.Document {
 wins: number;
 losses: number;
 games: IUserGame[];

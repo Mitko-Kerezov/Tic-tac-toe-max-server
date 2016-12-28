@@ -4,20 +4,6 @@ import {ModelEnumerationOperations} from '../data/models/ModelEnumerationOperati
 import {ISmallBoard} from 'Models';
 
 export module Validation {
-	export function checkUsername(username: string): boolean {
-		if (!username || !username.length) {
-			return false;
-		}
-
-		for(let i = 0, len = username.length; i < len; ++i) {
-			if (!~'aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789_ .'.indexOf(username[i])) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	export function checkMakeMoveData(makeMoveData: IMakeMoveRequestData): boolean {
 		return isBetween(makeMoveData.boardRow, 0, 4) &&
 			isBetween(makeMoveData.boardCol, 0, 4) &&

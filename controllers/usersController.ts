@@ -5,7 +5,7 @@ import {Encryption} from '../utilities/encryption';
 import {Validation} from '../utilities/validation';
 import {Errors} from '../utilities/errors';
 import {UserModel} from '../data/models/Users';
-import {IUser} from 'Models';
+import {IUser, ICoreUser} from 'Models';
 import {debug} from '../utilities/debugging';
 
 export module UsersController {
@@ -30,11 +30,6 @@ export module UsersController {
 
 	export function postRegister(req: express.Request, res: express.Response, next: Function): void {
 		let userRequestData: IUserRequestData = req.body;
-		if (!Validation.checkUsername(userRequestData.username)) {
-			Errors.send(res, 'Invalid username');
-			return;
-		}
-
 		if (!userRequestData.password || userRequestData.password !== userRequestData.confirmPassword) {
 			Errors.send(res, 'Password and confirm password do not match');
 			return;
@@ -46,13 +41,7 @@ export module UsersController {
 				return;
 			}
 
-			let salt = Encryption.generateSalt();
-			let user = {
-				username: userRequestData.username,
-				salt: salt,
-				hashPass: Encryption.generateHashedPassword(salt, userRequestData.password)
-			};
-
+			let user = getUser(userRequestData);
 			UserModel.create(user).then((createdUser: IUser) => {
 				debug('User %s registered', user.username);
 				res.status(201).send({
@@ -64,5 +53,14 @@ export module UsersController {
 				Errors.send(res, innerErr.message, innerErr.code || 500);
 			});
 		});
+	}
+
+	export function getUser(userRequestData: IUserRequestData): ICoreUser {
+		let salt = Encryption.generateSalt();
+		return {
+			username: userRequestData.username,
+			salt: salt,
+			hashPass: Encryption.generateHashedPassword(salt, userRequestData.password)
+		};
 	}
 };

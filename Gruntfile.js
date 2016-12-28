@@ -19,18 +19,18 @@ module.exports = function(grunt) {
 		},
 
 		tslint: {
-            build: {
-                files: {
-                    src: ["app.ts", "constants.ts", "controllers/**/*.ts", "errorHandlers/**/*.ts", "config/**/*.ts", "utilities/**/*.ts", "routes/**/*.ts", "data/**/*.ts"]
-                },
-                options: {
-                    configuration: grunt.file.readJSON("./tslint.json")
-                }
-            }
-        },
+			build: {
+				files: {
+					src: ["app.ts", "constants.ts", "controllers/**/*.ts", "errorHandlers/**/*.ts", "config/**/*.ts", "utilities/**/*.ts", "routes/**/*.ts", "data/**/*.ts"]
+				},
+				options: {
+					configuration: grunt.file.readJSON("./tslint.json")
+				}
+			}
+		},
 
 		clean: {
-            src: ["app.js", "constants.js", "controllers/**/*.js", "errorHandlers/**/*.js", "config/**/*.js", "utilities/**/*.js", "routes/**/*.js", "data/**/*.js"]
+			src: ["app.js", "constants.js", "controllers/**/*.js", "errorHandlers/**/*.js", "config/**/*.js", "utilities/**/*.js", "routes/**/*.js", "data/**/*.js"]
 		}
 	});
 

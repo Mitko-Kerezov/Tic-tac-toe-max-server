@@ -34,3 +34,4 @@ typings
 
 # Development files
 !Gruntfile.js
+.vscode

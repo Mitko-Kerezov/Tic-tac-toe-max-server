@@ -7,6 +7,7 @@ import {Server} from 'ws';
 import {Authentication} from '../config/auth';
 
 module.exports = (app: express.Application, webSocketServer: Server) => {
+	app.post('/fblogin', Authentication.fbLogin);
 	app.post('/login', Authentication.login);
 
 	app.post('/register', UsersController.postRegister);
